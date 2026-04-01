@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://tuuarv0lj00i"]
+
+[ext_resource type="Script" path="res://scripts/ui/game_hud.gd" id="1_hud"]
+
+[node name="GameHUD" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_hud")
+
+[node name="TopBar" type="PanelContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 60.0
+grow_horizontal = 2
+
+[node name="HBox" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="RoundLabel" type="Label" parent="TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "第 1 局 / 共 8 局"
+
+[node name="ScoreLabel" type="Label" parent="TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "🔴 红队 0 : 0 🔵 蓝队"
+size_flags_horizontal = 3
+horizontal_alignment = 1
+
+[node name="TurnLabel" type="Label" parent="TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "当前: 红队 一垒 #1壶"
+horizontal_alignment = 2
+
+[node name="SecondBar" type="PanelContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 62.0
+offset_bottom = 92.0
+grow_horizontal = 2
+
+[node name="HBox2" type="HBoxContainer" parent="SecondBar"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="HammerLabel" type="Label" parent="SecondBar/HBox2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "后手: 🔵 蓝队"
+
+[node name="StonesLeftLabel" type="Label" parent="SecondBar/HBox2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "剩余壶数: 红 8  蓝 8"
+size_flags_horizontal = 3
+horizontal_alignment = 2
+
+[node name="Scoreboard" type="PanelContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -140.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="ScoreGrid" type="GridContainer" parent="Scoreboard"]
+unique_name_in_owner = true
+layout_mode = 2
+columns = 1

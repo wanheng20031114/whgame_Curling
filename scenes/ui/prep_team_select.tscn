@@ -1,0 +1,150 @@
+[gd_scene format=3 uid="uid://cltgnm2yrjxhl"]
+
+[ext_resource type="Script" path="res://scripts/ui/prep_team_select.gd" id="1_prep"]
+
+[node name="PrepTeamSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_prep")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.1, 0.15, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TopBar" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="MarginContainer/VBox/TopBar"]
+layout_mode = 2
+text = "📋 准备阶段 — 选择队伍"
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RoomNameLabel" type="Label" parent="MarginContainer/VBox/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "房间: ..."
+
+[node name="Separator" type="HSeparator" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="TeamsContainer" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="RedTeamPanel" type="PanelContainer" parent="MarginContainer/VBox/TeamsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RedVBox" type="VBoxContainer" parent="MarginContainer/VBox/TeamsContainer/RedTeamPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RedTitle" type="Label" parent="MarginContainer/VBox/TeamsContainer/RedTeamPanel/RedVBox"]
+layout_mode = 2
+text = "🔴 红队"
+horizontal_alignment = 1
+modulate = Color(1, 0.3, 0.3, 1)
+
+[node name="RedSeparator" type="HSeparator" parent="MarginContainer/VBox/TeamsContainer/RedTeamPanel/RedVBox"]
+layout_mode = 2
+
+[node name="RedPlayerList" type="VBoxContainer" parent="MarginContainer/VBox/TeamsContainer/RedTeamPanel/RedVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="JoinRedButton" type="Button" parent="MarginContainer/VBox/TeamsContainer/RedTeamPanel/RedVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "← 加入红队"
+
+[node name="VSLabel" type="Label" parent="MarginContainer/VBox/TeamsContainer"]
+layout_mode = 2
+text = "VS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BlueTeamPanel" type="PanelContainer" parent="MarginContainer/VBox/TeamsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BlueVBox" type="VBoxContainer" parent="MarginContainer/VBox/TeamsContainer/BlueTeamPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BlueTitle" type="Label" parent="MarginContainer/VBox/TeamsContainer/BlueTeamPanel/BlueVBox"]
+layout_mode = 2
+text = "🔵 蓝队"
+horizontal_alignment = 1
+modulate = Color(0.3, 0.5, 1, 1)
+
+[node name="BlueSeparator" type="HSeparator" parent="MarginContainer/VBox/TeamsContainer/BlueTeamPanel/BlueVBox"]
+layout_mode = 2
+
+[node name="BluePlayerList" type="VBoxContainer" parent="MarginContainer/VBox/TeamsContainer/BlueTeamPanel/BlueVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="JoinBlueButton" type="Button" parent="MarginContainer/VBox/TeamsContainer/BlueTeamPanel/BlueVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "加入蓝队 →"
+
+[node name="Separator2" type="HSeparator" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="UnassignedLabel" type="Label" parent="MarginContainer/VBox"]
+layout_mode = 2
+text = "未选边:"
+
+[node name="UnassignedList" type="HBoxContainer" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BottomBar" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBox/BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "条件: 每队至少 1 人"
+size_flags_horizontal = 3
+
+[node name="StartButton" type="Button" parent="MarginContainer/VBox/BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "开始游戏（仅房主可见）"
+disabled = true

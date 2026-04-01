@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://b8386jsytj5mi"]
+
+[ext_resource type="Script" path="res://scripts/game/house_marker.gd" id="1_house"]
+
+[node name="HouseMarker" type="Node2D"]
+script = ExtResource("1_house")
+
+[node name="Ring4" type="Sprite2D" parent="."]
+
+[node name="Ring3" type="Sprite2D" parent="."]
+
+[node name="Ring2" type="Sprite2D" parent="."]
+
+[node name="Ring1" type="Sprite2D" parent="."]
+
+[node name="Button" type="Sprite2D" parent="."]

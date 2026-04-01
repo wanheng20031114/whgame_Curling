@@ -1,0 +1,102 @@
+[gd_scene format=3 uid="uid://c0lobby1scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/lobby.gd" id="1_lobby"]
+
+[node name="Lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lobby")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.1, 0.15, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TopBar" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBox/TopBar"]
+layout_mode = 2
+text = "🏠 大厅"
+horizontal_alignment = 0
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OnlineLabel" type="Label" parent="MarginContainer/VBox/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "在线: 0 人"
+horizontal_alignment = 2
+
+[node name="DisconnectButton" type="Button" parent="MarginContainer/VBox/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "断开连接"
+
+[node name="Separator" type="HSeparator" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="RoomListLabel" type="Label" parent="MarginContainer/VBox"]
+layout_mode = 2
+text = "房间列表:"
+
+[node name="RoomListContainer" type="ScrollContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 300)
+
+[node name="RoomList" type="VBoxContainer" parent="MarginContainer/VBox/RoomListContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="EmptyLabel" type="Label" parent="MarginContainer/VBox/RoomListContainer/RoomList"]
+layout_mode = 2
+text = "暂无房间，点击下方按钮创建一个吧！"
+horizontal_alignment = 1
+modulate = Color(0.6, 0.6, 0.6, 1)
+
+[node name="BottomBar" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBox/BottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CreateRoomButton" type="Button" parent="MarginContainer/VBox/BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "创建房间"
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
+horizontal_alignment = 1

@@ -1,0 +1,98 @@
+[gd_scene format=3 uid="uid://cdialog1scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/create_room_dialog.gd" id="1_dialog"]
+
+[node name="CreateRoomDialog" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dialog")
+
+[node name="Overlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(350, 0)
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+text = "📦 创建房间"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+text = "房间名"
+
+[node name="RoomNameInput" type="LineEdit" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "输入房间名称..."
+max_length = 30
+
+[node name="RoundsLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+text = "局数"
+
+[node name="RoundsOption" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+selected = 2
+item_count = 4
+popup/item_0/text = "4 局"
+popup/item_0/id = 4
+popup/item_1/text = "6 局"
+popup/item_1/id = 6
+popup/item_2/text = "8 局（默认）"
+popup/item_2/id = 8
+popup/item_3/text = "10 局"
+popup/item_3/id = 10
+
+[node name="Separator2" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="ButtonRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="CancelButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBox/ButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "取消"
+
+[node name="ConfirmButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBox/ButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "确认创建"

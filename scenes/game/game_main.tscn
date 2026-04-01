@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/game/game_main.gd" id="1_main"]
+[ext_resource type="PackedScene" path="res://scenes/game/curling_sheet.tscn" id="2_sheet"]
+[ext_resource type="PackedScene" path="res://scenes/camera/game_camera.tscn" id="3_camera"]
+[ext_resource type="PackedScene" path="res://scenes/ui/game_hud.tscn" id="4_hud"]
+
+[node name="GameMain" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="CurlingSheet" parent="." instance=ExtResource("2_sheet")]
+
+[node name="HouseMarker" type="Node2D" parent="CurlingSheet"]
+position = Vector2(0, -2040)
+
+[node name="StonesContainer" type="Node2D" parent="."]
+
+[node name="GameCamera" parent="." instance=ExtResource("3_camera")]
+
+[node name="GameHUD" parent="." instance=ExtResource("4_hud")]

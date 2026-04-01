@@ -1,0 +1,97 @@
+[gd_scene format=3 uid="uid://bq3wvr1cdhsek"]
+
+[ext_resource type="Script" path="res://scripts/ui/login.gd" id="1_login"]
+
+[node name="Login" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_login")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.1, 0.15, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(400, 0)
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+text = "🥌 whgame_Curling"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Separator1" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="UsernameLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+text = "用户名"
+
+[node name="UsernameInput" type="LineEdit" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "输入你的用户名..."
+max_length = 20
+
+[node name="ServerLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+text = "服务器地址"
+
+[node name="ServerInput" type="LineEdit" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "127.0.0.1"
+placeholder_text = "服务器 IP 或域名..."
+
+[node name="PortLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+text = "端口"
+
+[node name="PortInput" type="LineEdit" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "7777"
+placeholder_text = "7777"
+
+[node name="Separator2" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="ConnectButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "连 接"
+
+[node name="StatusLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "状态: 等待连接..."
+horizontal_alignment = 1
