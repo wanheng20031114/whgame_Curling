@@ -249,8 +249,12 @@ func request_join_room(room_id: int) -> void:
 			if sender_id in players:
 				players[sender_id]["room_id"] = room_id
 			
-			# 广播更新
+			# 广播更新（给大厅）
 			_sync_room_list.rpc(rooms)
+			
+			# 广播更新（给房间内所有人，确保等候室列表实时刷新）
+			for pid in room["players"]:
+				GameSync.sync_room_data.rpc_id(pid, room)
 			
 			# 新玩家加入后也进入准备阶段
 			call_deferred("_trigger_enter_prep", sender_id, room)

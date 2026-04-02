@@ -52,6 +52,7 @@ func _ready() -> void:
 	
 	# 连接 GameSync 信号以刷新界面
 	GameSync.team_data_updated.connect(_on_team_data_updated)
+	GameSync.room_data_updated.connect(_on_room_updated)
 	
 	# 更新房间名显示
 	room_name_label.text = "房间: " + GameSync.current_room.get("name", "未知")
@@ -90,6 +91,10 @@ func _on_start_pressed() -> void:
 
 func _on_team_data_updated(_data: Dictionary) -> void:
 	_refresh_team_display()
+
+func _on_room_updated(_data: Dictionary) -> void:
+	_refresh_team_display()
+
 
 
 # ============================================================================

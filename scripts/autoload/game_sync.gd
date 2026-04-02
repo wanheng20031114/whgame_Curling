@@ -54,6 +54,9 @@ signal ready_states_updated(ready_states: Dictionary)
 ## 收到进入准备阶段通知
 signal enter_prep_phase(room_data: Dictionary)
 
+## 收到房间数据更新（如新玩家加入）
+signal room_data_updated(room_data: Dictionary)
+
 ## 收到返回大厅通知
 signal return_to_lobby()
 
@@ -260,6 +263,11 @@ func notify_enter_prep(room_data: Dictionary) -> void:
 	enter_prep_phase.emit(room_data)
 	GameManager.go_to_prep_team()
 
+@rpc("authority", "reliable")
+func sync_room_data(data: Dictionary) -> void:
+	print("[GameSync] 收到房间数据更新")
+	current_room = data
+	room_data_updated.emit(data)
 
 ## 服务器 → 房间内所有客户端：进入游戏
 @rpc("authority", "reliable")

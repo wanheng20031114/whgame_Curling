@@ -35,6 +35,9 @@ const CurlingStoneScene: PackedScene = preload("res://scenes/game/curling_stone.
 @onready var game_camera: Camera2D = $GameCamera            ## 相机
 @onready var game_hud: CanvasLayer = $GameHUD                ## HUD
 
+var aim_overlay: Node2D                                     ## 瞄准显示层
+
+
 # ============================================================================
 # 游戏状态常量
 # ============================================================================
@@ -128,6 +131,16 @@ func _ready() -> void:
 	
 	# 初始化游戏
 	_init_round()
+	
+	# 设置全局层级（主体层级为0）
+	z_index = 0
+	
+	# 动态创建高层级 Overlay 用于绘制瞄准线（解决层级被赛道遮挡问题）
+	aim_overlay = Node2D.new()
+	aim_overlay.name = "AimOverlay"
+	aim_overlay.z_index = 100 # 极高层级，确保在所有物体之上
+	add_child(aim_overlay)
+	aim_overlay.draw.connect(_on_aim_overlay_draw)
 	
 	print("[GameMain] 游戏主场景已加载，总局数: %d, 联网: %s, 服务器: %s" % [
 		total_rounds, is_networked, is_server_instance
@@ -332,9 +345,19 @@ func _input_charging(event: InputEvent) -> void:
 ## 擦冰阶段的帧更新
 func _process_sweeping(_delta: float) -> void:
 	if current_sliding_stone and is_instance_valid(current_sliding_stone):
+		# 如果已经出界，就不再重复检测，防止死循环
+		if current_sliding_stone.is_out_of_bounds:
+			current_sliding_stone = null # 释放引用
+			return
+			
 		# 检测出界
 		if curling_sheet.is_stone_out_of_bounds(current_sliding_stone.global_position):
 			current_sliding_stone.mark_out_of_bounds()
+			current_sliding_stone = null # 立即置空，防止下一帧重复触发
+	
+	# 每一帧请求重绘 Overlay（确保瞄准线/力度条平滑）
+	if aim_overlay:
+		aim_overlay.queue_redraw()
 
 
 ## 擦冰阶段的输入处理
@@ -532,6 +555,9 @@ func _on_stone_out(stone: RigidBody2D) -> void:
 	print("[GameMain] 冰壶 #%d (%s) 出界" % [
 		stone.stone_index, "红" if stone.team == 0 else "蓝"
 	])
+	
+	# 出界视为一种特殊的停止状态，触发回合检查逻辑
+	_on_stone_stopped(stone)
 
 
 # ============================================================================
@@ -709,37 +735,38 @@ func _update_hud() -> void:
 # 绘制（瞄准线和力度条）
 # ============================================================================
 
-func _draw() -> void:
+func _on_aim_overlay_draw() -> void:
 	if throw_phase == ThrowPhase.AIMING or throw_phase == ThrowPhase.CHARGING:
 		var spawn_pos: Vector2 = curling_sheet.get_spawn_position() - global_position
 		
 		# --- 瞄准线 ---
 		var line_length: float = 200.0
 		var line_end: Vector2 = spawn_pos + aim_direction * line_length
-		var aim_color: Color = Color(0.2, 1.0, 0.2, 0.6)
-		draw_line(spawn_pos, line_end, aim_color, 2.0)
+		var aim_color: Color = Color(0.2, 1.0, 0.2, 0.9)  # 增强可见度
+		aim_overlay.draw_line(spawn_pos, line_end, aim_color, 4.0)
 		
 		# 方向箭头
-		draw_circle(line_end, 4.0, aim_color)
+		aim_overlay.draw_circle(line_end, 5.0, aim_color)
 		
 		# --- 旋转方向指示 ---
 		if selected_spin == -1:
-			draw_circle(spawn_pos + Vector2(-30, 0), 6, Color(1, 1, 0, 0.7))  # 左
+			aim_overlay.draw_circle(spawn_pos + Vector2(-40, 0), 8, Color(1, 1, 0, 0.9))  # 左
 		elif selected_spin == 1:
-			draw_circle(spawn_pos + Vector2(30, 0), 6, Color(1, 1, 0, 0.7))   # 右
+			aim_overlay.draw_circle(spawn_pos + Vector2(40, 0), 8, Color(1, 1, 0, 0.9))   # 右
 	
 	if throw_phase == ThrowPhase.CHARGING:
 		var spawn_pos: Vector2 = curling_sheet.get_spawn_position() - global_position
 		
 		# --- 力度条 ---
-		var bar_width: float = 100.0
-		var bar_height: float = 10.0
-		var bar_pos: Vector2 = spawn_pos + Vector2(-bar_width / 2, 30)
+		var bar_width: float = 120.0
+		var bar_height: float = 12.0
+		var bar_pos: Vector2 = spawn_pos + Vector2(-bar_width / 2, 40)
 		
-		# 背景
-		draw_rect(Rect2(bar_pos, Vector2(bar_width, bar_height)), Color(0.3, 0.3, 0.3, 0.8))
-		# 填充
+		# 背景（深色半透明）
+		aim_overlay.draw_rect(Rect2(bar_pos, Vector2(bar_width, bar_height)), Color(0.1, 0.1, 0.1, 0.7))
+		# 进度填充
 		var fill_color: Color = Color.GREEN.lerp(Color.RED, charge_power)
-		draw_rect(Rect2(bar_pos, Vector2(bar_width * charge_power, bar_height)), fill_color)
-		# 边框
-		draw_rect(Rect2(bar_pos, Vector2(bar_width, bar_height)), Color.WHITE, false, 1.0)
+		aim_overlay.draw_rect(Rect2(bar_pos, Vector2(bar_width * charge_power, bar_height)), fill_color)
+		# 亮白色边框，增强对比度
+		aim_overlay.draw_rect(Rect2(bar_pos, Vector2(bar_width, bar_height)), Color.WHITE, false, 2.0)
+
