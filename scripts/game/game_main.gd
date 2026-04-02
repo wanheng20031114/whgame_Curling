@@ -711,12 +711,26 @@ func _is_my_turn() -> bool:
 		var role_idx: int = 0  # 投壶手
 		var slot_key: String = "%d_%d_%d" % [current_team, position_idx, role_idx]
 		var assigned_peer: int = GameSync.slot_assignments.get(slot_key, -1)
+		
+		# 调试日志
+		if current_throw_index % 8 == 0: # 减少日志频率
+			print("[GameMain] 权限检查(Slot): Me:%d, Assigned:%d, Key:%s" % [my_id, assigned_peer, slot_key])
+			
 		if assigned_peer != -1:
 			return my_id == assigned_peer
 	
 	# 降级策略：没有槽位分配时，只要你属于当前投壶队伍就允许操作
-	var my_team: int = NetworkManager.players.get(my_id, {}).get("team", -1)
+	var my_data: Dictionary = NetworkManager.players.get(my_id, {})
+	var my_team: int = my_data.get("team", -1)
+	
+	# 调试日志
+	if current_throw_index % 8 == 0:
+		print("[GameMain] 权限检查(Team): Me:%d, MyTeam:%d, Target:%d, LocalPlayers:%d" % [
+			my_id, my_team, current_team, NetworkManager.players.size()
+		])
+	
 	return my_team == current_team
+
 
 
 # ============================================================================

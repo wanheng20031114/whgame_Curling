@@ -271,10 +271,25 @@ func sync_room_data(data: Dictionary) -> void:
 
 ## 服务器 → 房间内所有客户端：进入游戏
 @rpc("authority", "reliable")
-func notify_enter_game(room_data: Dictionary) -> void:
-	print("[GameSync] 收到开始游戏通知")
+func notify_enter_game(room_data: Dictionary, player_teams: Dictionary) -> void:
+	print("[GameSync] 收到开始游戏通知，同步 %d 名玩家队伍数据" % player_teams.size())
+	
+	# 强制对齐本地玩家队伍数据，防止 _is_my_turn 失效
+	for pid_str in player_teams:
+		var pid: int = int(pid_str)
+		if pid in NetworkManager.players:
+			NetworkManager.players[pid]["team"] = player_teams[pid_str]
+		else:
+			# 如果本地还没这个玩家，先建个档
+			NetworkManager.players[pid] = {
+				"username": "未知",
+				"room_id": room_data.get("id", -1),
+				"team": player_teams[pid_str]
+			}
+	
 	current_room = room_data
 	GameManager.go_to_game()
+
 
 
 ## 服务器 → 房间内所有客户端：返回大厅
@@ -442,13 +457,19 @@ func server_start_game(room_id: int) -> void:
 	
 	room["state"] = "playing"
 	
+	# 收集当前房间所有玩家的队伍快照，防止客户端同步延迟
+	var player_teams: Dictionary = {}
+	for pid in room["players"]:
+		player_teams[str(pid)] = NetworkManager.players.get(pid, {}).get("team", -1)
+	
 	# 向房间内所有玩家发送通知
 	for peer_id in room["players"]:
-		notify_enter_game.rpc_id(peer_id, room)
+		notify_enter_game.rpc_id(peer_id, room, player_teams)
 	
 	# 服务器自身也需要加载游戏场景来运行物理模拟
 	# 使用 call_deferred 确保 RPC 先发出
 	call_deferred("_server_load_game_scene", room)
+
 	
 	# 广播更新后的房间列表
 	NetworkManager._sync_room_list.rpc(NetworkManager.rooms)
