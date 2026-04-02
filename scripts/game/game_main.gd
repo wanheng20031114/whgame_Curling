@@ -671,17 +671,26 @@ func _is_my_turn() -> bool:
 	if not is_networked:
 		return true
 	
+	# 服务器端不需要操作 UI（Headless 模式，没有人在玩）
+	if is_server_instance:
+		return false
+	
 	var my_id: int = NetworkManager.get_local_peer_id()
-	
 	var current_team: int = _get_current_team()
-	@warning_ignore("integer_division")
-	var position_idx: int = (current_throw_index / 2) / 2
-	var role_idx: int = 0  # 投壶手
 	
-	var slot_key: String = "%d_%d_%d" % [current_team, position_idx, role_idx]
-	var assigned_peer: int = GameSync.slot_assignments.get(slot_key, -1)
+	# 如果有精确的槽位分配（经过了选位阶段），则严格匹配
+	if not GameSync.slot_assignments.is_empty():
+		@warning_ignore("integer_division")
+		var position_idx: int = (current_throw_index / 2) / 2
+		var role_idx: int = 0  # 投壶手
+		var slot_key: String = "%d_%d_%d" % [current_team, position_idx, role_idx]
+		var assigned_peer: int = GameSync.slot_assignments.get(slot_key, -1)
+		if assigned_peer != -1:
+			return my_id == assigned_peer
 	
-	return my_id == assigned_peer
+	# 降级策略：没有槽位分配时，只要你属于当前投壶队伍就允许操作
+	var my_team: int = NetworkManager.players.get(my_id, {}).get("team", -1)
+	return my_team == current_team
 
 
 # ============================================================================
