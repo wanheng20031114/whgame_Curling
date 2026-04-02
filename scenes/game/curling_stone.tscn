@@ -1,23 +1,27 @@
 [gd_scene format=3 uid="uid://bspifj3t7xrc7"]
 
-[ext_resource type="Script" path="res://scripts/game/curling_stone.gd" id="1_stone"]
+[ext_resource type="Script" uid="uid://ciqiq1skped4x" path="res://scripts/game/curling_stone.gd" id="1_stone"]
+[ext_resource type="Texture2D" uid="uid://bxfkagusjrvcx" path="res://assets/sprites/curling_stone_blue.png" id="2_cv6gj"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_stone"]
 radius = 16.0
 
-[node name="CurlingStone" type="RigidBody2D"]
+[node name="CurlingStone" type="RigidBody2D" unique_id=344309739]
 collision_layer = 2
 collision_mask = 3
 mass = 19.96
 gravity_scale = 0.0
 script = ExtResource("1_stone")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=486710922]
+position = Vector2(0, 0.49999952)
+scale = Vector2(0.5, 0.515625)
+texture = ExtResource("2_cv6gj")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1709597708]
 shape = SubResource("CircleShape2D_stone")
 
-[node name="StoneLabel" type="Label" parent="."]
+[node name="StoneLabel" type="Label" parent="." unique_id=1202707498]
 offset_left = -8.0
 offset_top = -10.0
 offset_right = 8.0

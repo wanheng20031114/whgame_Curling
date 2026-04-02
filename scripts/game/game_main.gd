@@ -150,6 +150,10 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# 检查是否轮到我操作（网络模式下，非法回合忽略输入）
+	if is_networked and not _is_my_turn():
+		return
+		
 	match throw_phase:
 		ThrowPhase.AIMING:
 			_input_aiming(event)
@@ -230,9 +234,29 @@ func _start_next_throw() -> void:
 		stone_number
 	])
 	
+	# 提前在投壶点生成冰壶供玩家瞄准时观察
+	# (客户端和服务器都会生成，但此时它被冻结)
+	_spawn_aiming_stone(current_team, stone_number)
+	
 	# 联网模式：服务器广播回合信息给所有客户端
 	if is_networked and multiplayer.is_server():
 		GameSync.sync_turn.rpc(current_throw_index, current_team, position_index, stone_number)
+
+## 在准备投壶阶段生成等待被投的冰壶
+func _spawn_aiming_stone(team: int, stone_index: int) -> void:
+	# 如果存在老的则清除（防错）
+	if current_sliding_stone and is_instance_valid(current_sliding_stone):
+		if current_sliding_stone not in active_stones:
+			current_sliding_stone.queue_free()
+	
+	var stone: RigidBody2D = CurlingStoneScene.instantiate()
+	stone.team = team
+	stone.stone_index = stone_index
+	stone.freeze = true  # 瞄准阶段不动
+	stones_container.add_child(stone)
+	stone.global_position = curling_sheet.get_spawn_position()
+	
+	current_sliding_stone = stone
 
 
 # ============================================================================
@@ -354,33 +378,25 @@ func _release_stone() -> void:
 
 ## 本地投壶（单机模式和服务器端共用）
 func _local_throw_stone(direction: Vector2, power: float, spin: int) -> void:
-	# 确定当前投壶队伍
-	var current_team: int = _get_current_team()
-	var stone_number: int = _get_current_stone_number()
-	
-	# 实例化冰壶
-	var stone: RigidBody2D = CurlingStoneScene.instantiate()
-	stone.team = current_team
-	stone.stone_index = stone_number
-	stones_container.add_child(stone)
-	
-	# 设置初始位置（投壶起点）
-	stone.global_position = curling_sheet.get_spawn_position()
-	
-	# 投掷！
-	stone.throw(direction, power, spin)
-	
-	# 连接冰壶停止信号
-	stone.stone_stopped.connect(_on_stone_stopped)
-	stone.stone_out_of_bounds.connect(_on_stone_out)
-	
-	# 记录
-	active_stones.append(stone)
-	current_sliding_stone = stone
-	stones_left[current_team] -= 1
-	
-	# 相机跟随冰壶
-	game_camera.start_following(stone)
+	# 服务器或单机执行真正的投壶
+	if current_sliding_stone and is_instance_valid(current_sliding_stone):
+		var stone: RigidBody2D = current_sliding_stone
+		# 将其正式加入场上冰壶数组
+		if not stone in active_stones:
+			active_stones.append(stone)
+			stones_left[stone.team] -= 1
+		
+		# 投掷！
+		stone.throw(direction, power, spin)
+		
+		# 连接冰壶停止信号
+		if not stone.stone_stopped.is_connected(_on_stone_stopped):
+			stone.stone_stopped.connect(_on_stone_stopped)
+		if not stone.stone_out_of_bounds.is_connected(_on_stone_out):
+			stone.stone_out_of_bounds.connect(_on_stone_out)
+			
+		# 相机跟随冰壶
+		game_camera.start_following(stone)
 	
 	# 进入擦冰阶段
 	throw_phase = ThrowPhase.SWEEPING
@@ -402,20 +418,16 @@ func _server_throw_stone(direction: Vector2, power: float, spin: int) -> void:
 func _on_throw_received(_direction: Vector2, _power: float, _spin: int, team: int, stone_index: int) -> void:
 	print("[GameMain] 客户端收到投壶广播: 队伍 %d, 壶 #%d" % [team, stone_index])
 	
-	# 创建视觉冰壶（客户端不运行物理，位置由服务器同步）
-	var stone: RigidBody2D = CurlingStoneScene.instantiate()
-	stone.team = team
-	stone.stone_index = stone_index
-	stone.freeze = true  # 客户端不运行物理，位置完全由服务器控制
-	stones_container.add_child(stone)
-	stone.global_position = curling_sheet.get_spawn_position()
+	# 客户端收到广播：确认将瞄准用冰壶投入实战
+	if current_sliding_stone and is_instance_valid(current_sliding_stone):
+		var stone: RigidBody2D = current_sliding_stone
+		if not stone in active_stones:
+			active_stones.append(stone)
+			stones_left[team] -= 1
+		
+		stone.freeze = true  # 客户端仍不跑物理
+		game_camera.start_following(stone)
 	
-	active_stones.append(stone)
-	current_sliding_stone = stone
-	stones_left[team] -= 1
-	
-	# 相机跟随
-	game_camera.start_following(stone)
 	throw_phase = ThrowPhase.SWEEPING
 
 
@@ -649,6 +661,27 @@ func _end_game() -> void:
 	await get_tree().create_timer(2.0).timeout
 	if not is_server_instance:
 		GameManager.go_to_result()
+
+
+# ============================================================================
+# 工具方法
+# ============================================================================
+
+func _is_my_turn() -> bool:
+	if not is_networked:
+		return true
+	
+	var my_id: int = NetworkManager.get_local_peer_id()
+	
+	var current_team: int = _get_current_team()
+	@warning_ignore("integer_division")
+	var position_idx: int = (current_throw_index / 2) / 2
+	var role_idx: int = 0  # 投壶手
+	
+	var slot_key: String = "%d_%d_%d" % [current_team, position_idx, role_idx]
+	var assigned_peer: int = GameSync.slot_assignments.get(slot_key, -1)
+	
+	return my_id == assigned_peer
 
 
 # ============================================================================

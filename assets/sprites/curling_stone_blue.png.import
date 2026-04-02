@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6sogrisag1sn"
-valid=false
+uid="uid://bxfkagusjrvcx"
+path="res://.godot/imported/curling_stone_blue.png-7bec6669f270c6accadc2dbb309d436c.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/sprites/curling_stone_blue.png"
+dest_files=["res://.godot/imported/curling_stone_blue.png-7bec6669f270c6accadc2dbb309d436c.ctex"]
 
 [params]
 

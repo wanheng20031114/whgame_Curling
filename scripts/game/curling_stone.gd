@@ -13,9 +13,9 @@
 #
 # 注意：物理模拟仅在服务器端运行（DESIGN.md 3.5）
 #       客户端只做位置和角度的视觉插值
-# ============================================================================
-
 extends RigidBody2D
+
+
 
 # ============================================================================
 # 导出参数 — 使用 @export 暴露给引擎检查器（DESIGN.md 核心原则 1.1）
@@ -177,9 +177,18 @@ func _update_visual() -> void:
 	if stone_label:
 		stone_label.text = str(stone_index)
 	
-	# 根据队伍设置颜色（临时方案，后续替换为图片素材）
-	# 红队：红色调  蓝队：蓝色调
-	if team == 0:
-		modulate = Color(1.0, 0.3, 0.3, 1.0)  # 红队
-	else:
-		modulate = Color(0.3, 0.5, 1.0, 1.0)  # 蓝队
+	# 应用高清冰壶贴图（使用动态 load 防止无头服务器未 import 而崩溃）
+	var sprite: Sprite2D = $Sprite2D
+	if sprite:
+		var tex: Texture2D
+		if team == 0:
+			tex = load("res://assets/sprites/curling_stone_red.png")
+		else:
+			tex = load("res://assets/sprites/curling_stone_blue.png")
+			
+		if tex:
+			sprite.texture = tex
+		else:
+			# 降级：如果找不到图片，则用老办法染色
+			if team == 0: modulate = Color(1.0, 0.3, 0.3, 1.0)
+			else: modulate = Color(0.3, 0.5, 1.0, 1.0)

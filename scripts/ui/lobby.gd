@@ -161,7 +161,7 @@ func _refresh_room_list(rooms: Array) -> void:
 ## 格式: [ 房间名 | 人数 | 状态 | 操作按钮 ]
 func _create_room_row(room: Dictionary) -> HBoxContainer:
 	var row: HBoxContainer = HBoxContainer.new()
-	row.theme_override_constants = 8  # 实际上这里需要用 add_theme_constant_override
+	row.add_theme_constant_override("separation", 8)
 	
 	# 房间名
 	var name_label: Label = Label.new()
@@ -194,10 +194,10 @@ func _create_room_row(room: Dictionary) -> HBoxContainer:
 	state_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	row.add_child(state_label)
 	
-	# 加入按钮（仅 waiting 状态且未满时可用）
+	# 加入按钮（waiting 和 preparing 状态且未满时可用）
 	var join_button: Button = Button.new()
 	join_button.text = "加入"
-	join_button.disabled = (state != "waiting" or current >= max_p)
+	join_button.disabled = (not state in ["waiting", "preparing"]) or (current >= max_p)
 	var room_id: int = room.get("id", -1)
 	join_button.pressed.connect(_on_join_room_pressed.bind(room_id))
 	row.add_child(join_button)

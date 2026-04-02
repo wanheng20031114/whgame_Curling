@@ -148,8 +148,21 @@ func register_player(username: String) -> void:
 	# 通知所有客户端有新玩家加入
 	_sync_player_joined.rpc(sender_id, username)
 	
+	# 向新加入的玩家发送完整的旧玩家列表（解决"问号"或"未知"的问题）
+	_sync_all_players.rpc_id(sender_id, players)
+	
 	# 向新加入的玩家发送当前房间列表
 	_sync_room_list.rpc_id(sender_id, rooms)
+
+
+## 服务器下发：将所有的玩家列表完整地同步给某个客户端
+@rpc("authority", "reliable")
+func _sync_all_players(all_players: Dictionary) -> void:
+	# 由于 JSON 序列化的键会变成字符串，我们需要转回 int
+	players.clear()
+	for pid_str in all_players:
+		players[int(pid_str)] = all_players[pid_str]
+	print("[NetworkManager] 本地已同步全服 %d 名玩家数据" % players.size())
 
 
 ## 服务器广播：通知所有客户端有新玩家加入
@@ -226,9 +239,9 @@ func request_join_room(room_id: int) -> void:
 				print("[NetworkManager] 房间 %d 已满，拒绝玩家 %d" % [room_id, sender_id])
 				return
 			
-			# 检查房间状态
-			if room["state"] != "waiting":
-				print("[NetworkManager] 房间 %d 不在等待状态，拒绝加入" % room_id)
+			# 检查房间状态（允许在 waiting 或 preparing 时加入）
+			if room["state"] not in ["waiting", "preparing"]:
+				print("[NetworkManager] 房间 %d 状态为 %s，拒绝加入" % [room_id, room["state"]])
 				return
 			
 			# 加入房间
@@ -263,6 +276,12 @@ func _trigger_enter_prep(peer_id: int, room: Dictionary) -> void:
 	
 	# 通知该玩家进入准备阶段
 	GameSync.notify_enter_prep.rpc_id(peer_id, room)
+	
+	# 必须把当前房间里已经选了队伍的老玩家的数据单发给这位新玩家，否则他看别人是未选边
+	var team_data: Dictionary = {}
+	for pid in room["players"]:
+		team_data[str(pid)] = players.get(pid, {}).get("team", -1)
+	GameSync.sync_team_data.rpc_id(peer_id, team_data)
 	
 	print("[NetworkManager] 通知玩家 %d 进入准备阶段" % peer_id)
 

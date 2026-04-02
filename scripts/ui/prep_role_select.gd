@@ -61,9 +61,16 @@ func _ready() -> void:
 	# 连接按钮事件
 	ready_button.pressed.connect(_on_ready_pressed)
 	
+	# 连接 GameSync 信号接收更新
+	GameSync.role_slots_updated.connect(_on_slots_updated)
+	GameSync.ready_states_updated.connect(_on_ready_states_updated)
+	
 	# 生成槽位 UI
 	_build_slots_ui(red_slots, TEAM_RED)
 	_build_slots_ui(blue_slots, TEAM_BLUE)
+	
+	# 刷新初始数据显示
+	_refresh_slots_display()
 	
 	print("[PrepRoleSelect] 选位置界面已加载")
 
@@ -130,97 +137,26 @@ func _on_slot_clicked(slot_key: String) -> void:
 		return
 	
 	# 发送认领/取消请求给服务器
-	_request_toggle_slot.rpc_id(1, slot_key)
+	GameSync.request_toggle_slot.rpc_id(1, slot_key)
 
 
 ## 点击"准备就绪"
 func _on_ready_pressed() -> void:
 	local_ready = not local_ready
-	ready_button.text = "✔ 已准备" if local_ready else "✔ 准备就绪"
-	_request_ready.rpc_id(1, local_ready)
+	GameSync.request_player_ready.rpc_id(1, local_ready)
 
 
 # ============================================================================
-# RPC 方法
+# 数据更新回调
 # ============================================================================
 
-## 客户端 → 服务器：切换槽位认领状态
-@rpc("any_peer", "reliable")
-func _request_toggle_slot(slot_key: String) -> void:
-	var sender_id: int = multiplayer.get_remote_sender_id()
-	
-	# 如果该槽位已被此玩家认领 → 取消
-	if slot_assignments.get(slot_key) == sender_id:
-		slot_assignments.erase(slot_key)
-		print("[PrepRoleSelect] 玩家 %d 取消槽位 %s" % [sender_id, slot_key])
-	# 如果槽位空闲 → 认领
-	elif slot_key not in slot_assignments:
-		slot_assignments[slot_key] = sender_id
-		print("[PrepRoleSelect] 玩家 %d 认领槽位 %s" % [sender_id, slot_key])
-	# 如果被别人占了
-	else:
-		print("[PrepRoleSelect] 槽位 %s 已被占用" % slot_key)
-		return
-	
-	# 广播更新
-	_sync_slots.rpc(slot_assignments)
-
-
-## 客户端 → 服务器：更新准备状态
-@rpc("any_peer", "reliable")
-func _request_ready(is_ready: bool) -> void:
-	var sender_id: int = multiplayer.get_remote_sender_id()
-	ready_states[sender_id] = is_ready
-	print("[PrepRoleSelect] 玩家 %d 准备状态: %s" % [sender_id, is_ready])
-	
-	# 广播准备状态
-	_sync_ready_states.rpc(ready_states)
-	
-	# 检查是否可以开始游戏
-	_check_start_conditions()
-
-
-## 服务器 → 所有客户端：同步槽位分配
-@rpc("authority", "reliable")
-func _sync_slots(data: Dictionary) -> void:
+func _on_slots_updated(data: Dictionary) -> void:
 	slot_assignments = data
 	_refresh_slots_display()
 
-
-## 服务器 → 所有客户端：同步准备状态
-@rpc("authority", "reliable")
-func _sync_ready_states(data: Dictionary) -> void:
+func _on_ready_states_updated(data: Dictionary) -> void:
 	ready_states = data
 	_update_status()
-
-
-## 服务器 → 所有客户端：开始游戏
-@rpc("authority", "reliable")
-func _start_game() -> void:
-	print("[PrepRoleSelect] 所有条件满足，游戏开始！")
-	GameManager.go_to_game()
-
-
-# ============================================================================
-# 游戏开始条件检查（服务器端）
-# ============================================================================
-
-## 检查是否满足开始条件：
-## 1. 所有 16 个槽位全部填满
-## 2. 所有玩家都已准备
-func _check_start_conditions() -> void:
-	# 检查槽位：两队各 4 位置 × 2 角色 = 每队 8 个，共 16 个
-	if slot_assignments.size() < 16:
-		return
-	
-	# 检查所有玩家是否准备
-	for peer_id in NetworkManager.players:
-		if not ready_states.get(peer_id, false):
-			return
-	
-	# 条件全部满足 → 开始游戏！
-	print("[PrepRoleSelect] ✅ 所有条件满足，通知开始游戏")
-	_start_game.rpc()
 
 
 # ============================================================================

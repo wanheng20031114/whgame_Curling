@@ -42,11 +42,17 @@ signal round_ended()
 ## 收到比赛结束通知
 signal game_ended(red_total: int, blue_total: int, round_scores: Array)
 
+## 收到准备阶段（选队）的队伍数据更新
+signal team_data_updated(team_data: Dictionary)
+
+## 收到准备阶段（选位）的槽位数据更新
+signal role_slots_updated(slot_assignments: Dictionary)
+
+## 收到准备阶段（选位）的准备状态更新
+signal ready_states_updated(ready_states: Dictionary)
+
 ## 收到进入准备阶段通知
 signal enter_prep_phase(room_data: Dictionary)
-
-## 收到开始游戏通知
-signal enter_game_phase(room_data: Dictionary)
 
 ## 收到返回大厅通知
 signal return_to_lobby()
@@ -57,6 +63,12 @@ signal return_to_lobby()
 
 ## 当前房间数据（客户端和服务器都持有一份）
 var current_room: Dictionary = {}
+
+## 【选位阶段】槽位分配表 (服务器权威)
+var slot_assignments: Dictionary = {}
+
+## 【选位阶段】各玩家准备状态 (服务器权威)
+var ready_states: Dictionary = {}
 
 ## 物理同步帧率（每秒发送多少次位置更新）
 ## 参考 DESIGN.md 3.5：使用不可靠传输发送高频物理数据
@@ -254,7 +266,6 @@ func notify_enter_prep(room_data: Dictionary) -> void:
 func notify_enter_game(room_data: Dictionary) -> void:
 	print("[GameSync] 收到开始游戏通知")
 	current_room = room_data
-	enter_game_phase.emit(room_data)
 	GameManager.go_to_game()
 
 
@@ -265,6 +276,126 @@ func notify_return_lobby() -> void:
 	current_room = {}
 	return_to_lobby.emit()
 	GameManager.go_to_lobby()
+
+
+# ============================================================================
+# RPC 方法 — 选边阶段（来自原 prep_team_select）
+# ============================================================================
+
+@rpc("any_peer", "reliable")
+func request_join_team(team: int) -> void:
+	if not multiplayer.is_server(): return
+	var sender_id: int = multiplayer.get_remote_sender_id()
+	
+	if sender_id in NetworkManager.players:
+		NetworkManager.players[sender_id]["team"] = team
+	
+	var room_id: int = NetworkManager.players.get(sender_id, {}).get("room_id", -1)
+	var room: Dictionary = _find_room(room_id)
+	if room.is_empty(): return
+	
+	var team_data: Dictionary = {}
+	# 仅下发此房间内的队伍数据
+	for peer_id in room["players"]:
+		team_data[str(peer_id)] = NetworkManager.players.get(peer_id, {}).get("team", -1)
+	
+	for peer_id in room["players"]:
+		sync_team_data.rpc_id(peer_id, team_data)
+
+
+@rpc("authority", "reliable")
+func sync_team_data(team_data: Dictionary) -> void:
+	for peer_id_str in team_data:
+		var peer_id: int = int(peer_id_str)
+		if peer_id in NetworkManager.players:
+			NetworkManager.players[peer_id]["team"] = team_data[peer_id_str]
+	team_data_updated.emit(team_data)
+
+@rpc("any_peer", "reliable")
+func request_start_role_select() -> void:
+	if not multiplayer.is_server(): return
+	var sender_id: int = multiplayer.get_remote_sender_id()
+	var room_id: int = NetworkManager.players.get(sender_id, {}).get("room_id", -1)
+	var room: Dictionary = _find_room(room_id)
+	if room.is_empty(): return
+	
+	var red_count: int = 0
+	var blue_count: int = 0
+	for peer_id in room["players"]:
+		var team: int = NetworkManager.players.get(peer_id, {}).get("team", -1)
+		if team == 0: red_count += 1
+		elif team == 1: blue_count += 1
+	
+	if red_count >= 1 and blue_count >= 1:
+		room["state"] = "role_selecting"  # 锁定房间状态，大厅玩家无法再加入
+		NetworkManager._sync_room_list.rpc(NetworkManager.rooms)
+		
+		for peer_id in room["players"]:
+			notify_enter_role_select.rpc_id(peer_id)
+
+@rpc("authority", "reliable")
+func notify_enter_role_select() -> void:
+	print("[GameSync] 收到选位置阶段通知")
+	GameManager.go_to_prep_role()
+
+
+# ============================================================================
+# RPC 方法 — 选位阶段（来自原 prep_role_select）
+# ============================================================================
+
+@rpc("any_peer", "reliable")
+func request_toggle_slot(slot_key: String) -> void:
+	if not multiplayer.is_server(): return
+	var sender_id: int = multiplayer.get_remote_sender_id()
+	
+	if slot_assignments.get(slot_key) == sender_id:
+		slot_assignments.erase(slot_key)
+	elif slot_key not in slot_assignments:
+		slot_assignments[slot_key] = sender_id
+	else:
+		return
+	var room_id: int = NetworkManager.players.get(sender_id, {}).get("room_id", -1)
+	var room: Dictionary = _find_room(room_id)
+	if room.is_empty(): return
+	
+	for peer_id in room["players"]:
+		sync_slots.rpc_id(peer_id, slot_assignments)
+
+@rpc("authority", "reliable")
+func sync_slots(data: Dictionary) -> void:
+	slot_assignments = data
+	role_slots_updated.emit(data)
+
+@rpc("any_peer", "reliable")
+func request_player_ready(is_ready: bool) -> void:
+	if not multiplayer.is_server(): return
+	var sender_id: int = multiplayer.get_remote_sender_id()
+	ready_states[sender_id] = is_ready
+	var room_id: int = NetworkManager.players.get(sender_id, {}).get("room_id", -1)
+	var room: Dictionary = _find_room(room_id)
+	if room.is_empty(): return
+	
+	for peer_id in room["players"]:
+		sync_ready_states.rpc_id(peer_id, ready_states)
+	
+	_check_start_conditions(sender_id)
+
+@rpc("authority", "reliable")
+func sync_ready_states(data: Dictionary) -> void:
+	ready_states = data
+	ready_states_updated.emit(data)
+
+func _check_start_conditions(sender_id: int) -> void:
+	var room_id: int = NetworkManager.players.get(sender_id, {}).get("room_id", -1)
+	var room: Dictionary = _find_room(room_id)
+	if room.is_empty(): return
+
+	if slot_assignments.size() < 16: return
+	for peer_id in room["players"]:
+		if not ready_states.get(peer_id, false): return
+	
+	# 所有人都准备好了，开启游戏
+	server_start_game(room_id)
 
 
 # ============================================================================
