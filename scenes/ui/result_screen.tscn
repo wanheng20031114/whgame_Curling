@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://dtpmlkscw4y7"]
 
-[ext_resource type="Script" path="res://scripts/ui/result_screen.gd" id="1_result"]
+[ext_resource type="Script" uid="uid://dajojh2d8a31w" path="res://scripts/ui/result_screen.gd" id="1_result"]
 
-[node name="ResultScreen" type="Control"]
+[node name="ResultScreen" type="Control" unique_id=1819946931]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_result")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=534996566]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.05, 0.07, 0.12, 1)
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=2029056739]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -28,38 +28,37 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="CenterContainer"]
+[node name="VBox" type="VBoxContainer" parent="CenterContainer" unique_id=1678033359]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Trophy" type="Label" parent="CenterContainer/VBox"]
+[node name="Trophy" type="Label" parent="CenterContainer/VBox" unique_id=1139511986]
 layout_mode = 2
 text = "🏆 比赛结束！"
 horizontal_alignment = 1
 
-[node name="ScoreLabel" type="Label" parent="CenterContainer/VBox"]
+[node name="ScoreLabel" type="Label" parent="CenterContainer/VBox" unique_id=1674516931]
 unique_name_in_owner = true
 layout_mode = 2
 text = "🔴 红队  0  :  0  🔵 蓝队"
 horizontal_alignment = 1
 
-[node name="Separator" type="HSeparator" parent="CenterContainer/VBox"]
+[node name="Separator" type="HSeparator" parent="CenterContainer/VBox" unique_id=1754759903]
 layout_mode = 2
 
-[node name="RoundScoreTitle" type="Label" parent="CenterContainer/VBox"]
+[node name="RoundScoreTitle" type="Label" parent="CenterContainer/VBox" unique_id=475692021]
 layout_mode = 2
 text = "逐局得分"
 horizontal_alignment = 1
 
-[node name="ScoreGrid" type="GridContainer" parent="CenterContainer/VBox"]
+[node name="ScoreGrid" type="GridContainer" parent="CenterContainer/VBox" unique_id=948093169]
 unique_name_in_owner = true
 layout_mode = 2
-columns = 1
 
-[node name="Separator2" type="HSeparator" parent="CenterContainer/VBox"]
+[node name="Separator2" type="HSeparator" parent="CenterContainer/VBox" unique_id=1990199712]
 layout_mode = 2
 
-[node name="ReturnButton" type="Button" parent="CenterContainer/VBox"]
+[node name="ReturnButton" type="Button" parent="CenterContainer/VBox" unique_id=179614616]
 unique_name_in_owner = true
 layout_mode = 2
 text = "返回大厅"

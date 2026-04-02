@@ -16,6 +16,11 @@ grow_horizontal = 2
 layout_mode = 2
 theme_override_constants/separation = 20
 
+[node name="MyTeamLabel" type="Label" parent="TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "我的队伍: ?"
+
 [node name="RoundLabel" type="Label" parent="TopBar/HBox"]
 unique_name_in_owner = true
 layout_mode = 2

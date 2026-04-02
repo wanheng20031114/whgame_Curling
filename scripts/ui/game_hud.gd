@@ -25,6 +25,7 @@ extends CanvasLayer
 @onready var hammer_label: Label = %HammerLabel            ## 后手标记
 @onready var stones_left_label: Label = %StonesLeftLabel   ## 剩余壶数
 @onready var score_grid: GridContainer = %ScoreGrid        ## 逐局得分板
+@onready var my_team_label: Label = %MyTeamLabel            ## 我的队伍显示
 
 # ============================================================================
 # 位置名称（用于显示）
@@ -80,6 +81,19 @@ func update_hammer(team: int) -> void:
 ## @param blue_left: 蓝队剩余壶数
 func update_stones_left(red_left: int, blue_left: int) -> void:
 	stones_left_label.text = "剩余壶数: 红 %d  蓝 %d" % [red_left, blue_left]
+
+
+## 更新本地玩家所属队伍显示
+func update_my_team(team: int) -> void:
+	if team == 0:
+		my_team_label.text = "我的队伍: 🔴 红色方"
+		my_team_label.modulate = Color(1, 0.4, 0.4, 1) # 浅红
+	elif team == 1:
+		my_team_label.text = "我的队伍: 🔵 蓝色方"
+		my_team_label.modulate = Color(0.4, 0.6, 1, 1) # 浅蓝
+	else:
+		my_team_label.text = "我的队伍: 观众"
+		my_team_label.modulate = Color.WHITE
 
 
 ## 更新逐局得分板

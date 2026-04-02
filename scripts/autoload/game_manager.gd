@@ -145,7 +145,7 @@ func _start_client_mode() -> void:
 	call_deferred("_load_login_scene")
 
 
-## 加载登录场景
+# 加载登录场景
 func _load_login_scene() -> void:
 	print("[GameManager] 加载登录界面...")
 	get_tree().change_scene_to_file("res://scenes/ui/login.tscn")
@@ -155,7 +155,7 @@ func _load_login_scene() -> void:
 # 公开方法 — 场景切换
 # ============================================================================
 
-## 切换到大厅
+# 切换到大厅
 func go_to_lobby() -> void:
 	print("[GameManager] 切换到大厅")
 	current_state = GameState.LOBBY

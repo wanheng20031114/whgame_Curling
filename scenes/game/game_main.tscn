@@ -1,20 +1,20 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://dtmsak0s72qdx"]
 
-[ext_resource type="Script" path="res://scripts/game/game_main.gd" id="1_main"]
-[ext_resource type="PackedScene" path="res://scenes/game/curling_sheet.tscn" id="2_sheet"]
-[ext_resource type="PackedScene" path="res://scenes/camera/game_camera.tscn" id="3_camera"]
-[ext_resource type="PackedScene" path="res://scenes/ui/game_hud.tscn" id="4_hud"]
+[ext_resource type="Script" uid="uid://bdijfj3twtd0r" path="res://scripts/game/game_main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://bge8uj3t7xrc7" path="res://scenes/game/curling_sheet.tscn" id="2_sheet"]
+[ext_resource type="PackedScene" uid="uid://pap488r70nea" path="res://scenes/camera/game_camera.tscn" id="3_camera"]
+[ext_resource type="PackedScene" uid="uid://tuuarv0lj00i" path="res://scenes/ui/game_hud.tscn" id="4_hud"]
 
-[node name="GameMain" type="Node2D"]
+[node name="GameMain" type="Node2D" unique_id=1209979774]
 script = ExtResource("1_main")
 
-[node name="CurlingSheet" parent="." instance=ExtResource("2_sheet")]
+[node name="CurlingSheet" parent="." unique_id=1575067830 instance=ExtResource("2_sheet")]
 
-[node name="HouseMarker" type="Node2D" parent="CurlingSheet"]
+[node name="HouseMarker" type="Node2D" parent="CurlingSheet" unique_id=1814456616]
 position = Vector2(0, -2040)
 
-[node name="StonesContainer" type="Node2D" parent="."]
+[node name="StonesContainer" type="Node2D" parent="." unique_id=1447962279]
 
-[node name="GameCamera" parent="." instance=ExtResource("3_camera")]
+[node name="GameCamera" parent="." unique_id=1832446948 instance=ExtResource("3_camera")]
 
-[node name="GameHUD" parent="." instance=ExtResource("4_hud")]
+[node name="GameHUD" parent="." unique_id=8587774 instance=ExtResource("4_hud")]

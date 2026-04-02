@@ -145,6 +145,12 @@ func _ready() -> void:
 	print("[GameMain] 游戏主场景已加载，总局数: %d, 联网: %s, 服务器: %s" % [
 		total_rounds, is_networked, is_server_instance
 	])
+	
+	# 初始化 HUD 的队伍显示
+	if not is_server_instance:
+		var my_id: int = NetworkManager.get_local_peer_id()
+		var my_team: int = NetworkManager.players.get(my_id, {}).get("team", -1)
+		game_hud.update_my_team(my_team)
 
 
 func _exit_tree() -> void:
@@ -485,8 +491,19 @@ func _on_turn_sync(throw_index: int, current_team: int, position_index: int, sto
 	current_throw_index = throw_index
 	game_hud.update_turn(current_team, position_index, stone_number)
 	game_hud.update_stones_left(stones_left[0], stones_left[1])
-	throw_phase = ThrowPhase.WAITING  # 等待服务器告知谁操作
 	game_camera.return_to_spawn()
+	
+	# 根据权限决定进入什么状态
+	if _is_my_turn():
+		print("[GameMain] 轮到我投壶！切换至瞄准阶段")
+		throw_phase = ThrowPhase.AIMING
+		aim_angle = 0.0
+		charge_power = 0.0
+		selected_spin = 0
+		# 客户端在收到回合通知时同步生成用于瞄准的冰壶（视觉用）
+		_spawn_aiming_stone(current_team, stone_number)
+	else:
+		throw_phase = ThrowPhase.WAITING
 
 
 ## 客户端收到得分同步
@@ -783,4 +800,3 @@ func _on_aim_overlay_draw() -> void:
 		aim_overlay.draw_rect(Rect2(bar_pos, Vector2(bar_width * charge_power, bar_height)), fill_color)
 		# 亮白色边框，增强对比度
 		aim_overlay.draw_rect(Rect2(bar_pos, Vector2(bar_width, bar_height)), Color.WHITE, false, 2.0)
-
